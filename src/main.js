@@ -1,5 +1,6 @@
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
+import './css/styles.css';
 
 import { getImagesByQuery } from './js/pixabay-api.js';
 import {
@@ -12,20 +13,17 @@ import {
   refs,
 } from './js/render-functions.js';
 
-const formEl = document.querySelector('.form');
-const loadMoreBtn = refs.loadMoreBtn;
-
 let query = '';
 let page = 1;
 let totalPages = 0;
 
-formEl.addEventListener('submit', onSearch);
-loadMoreBtn.addEventListener('click', onLoadMore);
+refs.loadMoreBtn.addEventListener('click', onLoadMore);
+document.querySelector('.form').addEventListener('submit', onSearch);
 
 async function onSearch(e) {
   e.preventDefault();
-
-  query = e.target.elements['search-text'].value.trim();
+  const input = e.target.elements['search-text'];
+  query = input.value.trim();
   if (!query) return;
 
   page = 1;
@@ -37,9 +35,7 @@ async function onSearch(e) {
     const data = await getImagesByQuery(query, page);
 
     if (!data.hits.length) {
-      iziToast.error({
-        message: 'Sorry, there are no images matching your search query.',
-      });
+      iziToast.error({ message: 'No images found for your query.' });
       return;
     }
 
@@ -48,8 +44,8 @@ async function onSearch(e) {
     totalPages = Math.ceil(data.totalHits / 15);
 
     if (page < totalPages) showLoadMoreButton();
-  } catch {
-    iziToast.error({ message: 'Something went wrong. Please try again.' });
+  } catch (err) {
+    iziToast.error({ message: 'Error fetching images.' });
   } finally {
     hideLoader();
   }
@@ -61,8 +57,8 @@ async function onLoadMore() {
 
   try {
     const data = await getImagesByQuery(query, page);
-
     createGallery(data.hits);
+
     smoothScroll();
 
     if (page >= totalPages) {
@@ -71,21 +67,21 @@ async function onLoadMore() {
         message: "We're sorry, but you've reached the end of search results.",
       });
     }
-  } catch {
-    iziToast.error({ message: 'Something went wrong. Please try again.' });
+  } catch (err) {
+    iziToast.error({ message: 'Error fetching images.' });
   } finally {
     hideLoader();
   }
 }
 
 function smoothScroll() {
-  const card = document.querySelector('.gallery__item');
-  if (!card) return;
-
-  const { height } = card.getBoundingClientRect();
+  const cardHeight =
+    refs.galleryContainer
+      .querySelector('.gallery__item')
+      ?.getBoundingClientRect().height || 0;
 
   window.scrollBy({
-    top: height * 2,
+    top: cardHeight * 2,
     behavior: 'smooth',
   });
 }

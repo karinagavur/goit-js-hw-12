@@ -10,16 +10,6 @@ const lightbox = new SimpleLightbox('.gallery a', {
   captionDelay: 250,
 });
 
-function escapeHtml(str) {
-  if (!str) return '';
-  return String(str)
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
-}
-
 export function createGallery(images) {
   if (!galleryContainer || !Array.isArray(images)) return;
 
@@ -36,11 +26,9 @@ export function createGallery(images) {
       } = img;
 
       return `
-      <li class="gallery__item">
-        <a class="gallery__link" href="${largeImageURL}">
-          <img class="gallery__image" src="${webformatURL}" alt="${escapeHtml(
-        tags
-      )}" loading="lazy" />
+      <li class="gallery-item">
+        <a class="gallery-link" href="${largeImageURL}">
+          <img class="gallery-image" src="${webformatURL}" alt="${tags}" loading="lazy" />
         </a>
         <div class="info">
           <p><b>Likes:</b> ${likes}</p>
@@ -59,33 +47,27 @@ export function createGallery(images) {
 export function clearGallery() {
   if (!galleryContainer) return;
   galleryContainer.innerHTML = '';
-  try {
-    lightbox.refresh();
-  } catch {}
+  lightbox.refresh();
 }
 
 export function showLoader() {
-  if (!loaderEl) return;
-  loaderEl.classList.add('visible');
+  loaderEl.classList.remove('is-hidden');
 }
 
 export function hideLoader() {
-  if (!loaderEl) return;
-  loaderEl.classList.remove('visible');
+  loaderEl.classList.add('is-hidden');
 }
 
 export function showLoadMoreButton() {
-  if (!loadMoreBtn) return;
   loadMoreBtn.classList.remove('is-hidden');
 }
 
 export function hideLoadMoreButton() {
-  if (!loadMoreBtn) return;
   loadMoreBtn.classList.add('is-hidden');
 }
 
 export const refs = {
   galleryContainer,
-  loaderEl,
   loadMoreBtn,
+  loaderEl,
 };
